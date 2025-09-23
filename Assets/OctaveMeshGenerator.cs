@@ -9,6 +9,7 @@ public class OctaveMeshGenerator : MonoBehaviour
     [Range(0, 60)] public float heightMultiplier = 5f;
 
     public Gradient colorGradient;
+    public AnimationCurve meshHeightCurve;
 
     public bool useRandomSeed = false;
     public int seed = 0;
@@ -76,6 +77,10 @@ public class OctaveMeshGenerator : MonoBehaviour
                 }
 
                 y = (y / maxAmplitude) * heightMultiplier;
+
+                float normalizedHeight = Mathf.InverseLerp(0f, heightMultiplier, y);
+                y = meshHeightCurve.Evaluate(normalizedHeight) * heightMultiplier;
+
                 vertices[i] = new Vector3(x, y, z);
 
                 if (y < minHeight) minHeight = y;

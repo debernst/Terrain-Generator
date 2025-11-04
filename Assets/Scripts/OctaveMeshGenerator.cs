@@ -17,7 +17,7 @@ public class OctaveMeshGenerator : MonoBehaviour
     private float offsetX;
     private float offsetZ;
 
-    public int octaveCount = 4;
+    [Range(1, 6)] public int octaveCount = 3;
     [Range(0, 2)] public float persistence = 0.5f;
 
 

@@ -18,6 +18,9 @@ public class CaveGenerator : MonoBehaviour
     private float offsetY;
     private float offsetZ;
 
+    [Range(1, 6)] public int octaveCount = 3;
+    [Range(0f, 1f)] public float persistence = 0.5f;
+
     void Start()
     {
         GenerateOffsets();
@@ -58,11 +61,27 @@ public class CaveGenerator : MonoBehaviour
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    float sampleX = (x + offsetX) / noiseScale;
-                    float sampleY = (y + offsetY) / noiseScale;
-                    float sampleZ = (z + offsetZ) / noiseScale;
+                    float amplitude = 1f;
+                    float frequency = 1f;
+                    float noiseValue = 0f;
+                    float totalAmplitude = 0f;
 
-                    float noiseValue = Perlin3D(sampleX, sampleY, sampleZ);
+                    // use octaves for during generation
+                    for (int o = 0; o < octaveCount; o++)
+                    {
+                        float sampleX = (x + offsetX) / noiseScale * frequency;
+                        float sampleY = (y + offsetY) / noiseScale * frequency;
+                        float sampleZ = (z + offsetZ) / noiseScale * frequency;
+
+                        noiseValue += Perlin3D(sampleX, sampleY, sampleZ) * amplitude;
+                        totalAmplitude += amplitude;
+
+                        amplitude *= persistence;
+                        frequency *= 2f;
+                    }
+
+                    noiseValue /= totalAmplitude;
+
                     map[x, y, z] = (noiseValue > surfaceThreshold) ? 1 : 0;
                 }
             }

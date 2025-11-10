@@ -51,6 +51,7 @@ public class CaveGenerator : MonoBehaviour
         Mesh mesh = new Mesh();
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // This allocates the mesh more rendering power for the mesh faces (Thanks Evan :D)
 
         int[,,] map = new int[width, height, depth];
 

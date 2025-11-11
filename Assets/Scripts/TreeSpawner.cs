@@ -21,6 +21,8 @@ public class TreeSpawner : MonoBehaviour
 
     public void SpawnTrees()
     {
+        ClearTrees();
+
         MeshFilter meshFilter = GetComponent<MeshFilter>();
         Mesh mesh = meshFilter.sharedMesh;
 
@@ -73,12 +75,24 @@ public class TreeSpawner : MonoBehaviour
         }
     }
 
+    public void ClearTrees()
+    {
+        foreach (var t in spawnedTrees)
+        {
+            if (t != null)
+                Destroy(t);
+        }
+        spawnedTrees.Clear();
+    }
+
+    private void OnDestroy()
+    {
+        ClearTrees();
+    }
+
     void OnValidate()
     {
         SpawnTrees();
     }
-
-    // TODO:
-    // Auto Remove Trees when chaning seeds
 
 }

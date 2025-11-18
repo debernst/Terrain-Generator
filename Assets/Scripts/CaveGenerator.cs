@@ -17,6 +17,9 @@ public class CaveGenerator : MonoBehaviour
     private float offsetX;
     private float offsetY;
     private float offsetZ;
+    [HideInInspector] public float offsetXChunk;
+    [HideInInspector] public float offsetYChunk;
+    [HideInInspector] public float offsetZChunk;
 
     [Range(1, 6)] public int octaveCount = 3;
     [Range(0f, 1f)] public float persistence = 0.5f;
@@ -46,7 +49,7 @@ public class CaveGenerator : MonoBehaviour
         offsetZ = rngSeed.Next(-100000, 100000);
     }
 
-    void GenerateCaves()
+    public void GenerateCaves()
     {
         Mesh mesh = new Mesh();
         List<Vector3> vertices = new List<Vector3>();
@@ -70,9 +73,9 @@ public class CaveGenerator : MonoBehaviour
                     // use octaves for during generation
                     for (int o = 0; o < octaveCount; o++)
                     {
-                        float sampleX = (x + offsetX) / noiseScale * frequency;
-                        float sampleY = (y + offsetY) / noiseScale * frequency;
-                        float sampleZ = (z + offsetZ) / noiseScale * frequency;
+                        float sampleX = (x + offsetX + offsetXChunk) / noiseScale * frequency;
+                        float sampleY = (y + offsetY + offsetYChunk) / noiseScale * frequency;
+                        float sampleZ = (z + offsetZ + offsetZChunk) / noiseScale * frequency;
 
                         noiseValue += Perlin3D(sampleX, sampleY, sampleZ) * amplitude;
                         totalAmplitude += amplitude;

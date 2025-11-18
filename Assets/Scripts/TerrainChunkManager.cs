@@ -4,6 +4,7 @@ using UnityEngine;
 public class TerrainChunkManager : MonoBehaviour
 {
     public OctaveMeshGenerator chunkPrefab;
+    public CaveGenerator cavePrefab;
 
     public int chunksX = 3;
     public int chunksZ = 3;
@@ -42,8 +43,15 @@ public class TerrainChunkManager : MonoBehaviour
 
                 // Generates terrain
                 newChunk.GenerateTerrain();
+
+                CaveGenerator cave = Instantiate(cavePrefab, newChunk.transform);
+                cave.name = $"Cave_{x}_{z}";
+
+                cave.offsetXChunk = x * cave.width;
+                cave.offsetZChunk = z * cave.depth;
+
+                cave.GenerateCaves();
             }
         }
-    }  }
     }
 }

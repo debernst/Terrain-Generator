@@ -14,8 +14,8 @@ public class OctaveMeshGenerator : MonoBehaviour
     public bool useRandomSeed = false;
     public int seed = 0;
 
-    private float offsetX;
-    private float offsetZ;
+    [HideInInspector] public float offsetX;
+    [HideInInspector] public float offsetZ;
 
     [Range(1, 6)] public int octaveCount = 3;
     [Range(0, 2)] public float persistence = 0.5f;
@@ -44,7 +44,7 @@ public class OctaveMeshGenerator : MonoBehaviour
         offsetZ = rngSeed.Next(-100000, 100000);
     }
 
-    void GenerateTerrain()
+    public void GenerateTerrain()
     {
         Mesh mesh = new Mesh();
         Vector3[] vertices = new Vector3[(width + 1) * (height + 1)];

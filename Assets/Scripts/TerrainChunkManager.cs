@@ -29,6 +29,7 @@ public class TerrainChunkManager : MonoBehaviour
         {
             for (int z = 0; z < chunksZ; z++)
             {
+                // Terrain / chunk parent generation
                 OctaveMeshGenerator newChunk = Instantiate(chunkPrefab, transform);
                 newChunk.name = $"Chunk_{x}_{z}";
 
@@ -44,12 +45,14 @@ public class TerrainChunkManager : MonoBehaviour
                 // Generates terrain
                 newChunk.GenerateTerrain();
 
+                // Cave chunk generation
                 CaveGenerator cave = Instantiate(cavePrefab, newChunk.transform);
                 cave.name = $"Cave_{x}_{z}";
 
                 cave.offsetXChunk = x * cave.width;
                 cave.offsetZChunk = z * cave.depth;
 
+                // Generates Cabes
                 cave.GenerateCaves();
             }
         }

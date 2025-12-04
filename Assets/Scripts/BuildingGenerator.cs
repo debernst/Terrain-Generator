@@ -5,24 +5,35 @@ public class BuildingGenerator : MonoBehaviour
 {
     public GameObject wallPrefab;
     public GameObject roofPrefab;
+    public GameObject windowPrefab;
+    public GameObject doorPrefab;
 
     public bool includeRoof = true;
     public int width = 1;
     public int height = 1;
     public float cellUnitSize = 1;
     public int numberOfFloors = 1;
-
-    [SerializeField] public Floor[] floors;
+    public bool doorsOnGroundFloorOnly = true;
+    [Range(0.0f, 1.0f)] public float doorPercentChance = 0.3f;
+    [Range(0.0f, 1.0f)] public float windowPercentChance = 0.5f;
+    public Floor[] floors;
 
     public class Wall
     {
         public enum WallType
         {
-            Plain
+            Plain,
+            Door,
+            Window
         }
         public WallType WallTypeSelected { get; private set; } = WallType.Plain;
 
         public Wall(WallType wallType = WallType.Plain)
+        {
+            this.WallTypeSelected = wallType;
+        }
+
+        public void SetWallType(WallType wallType)
         {
             this.WallTypeSelected = wallType;
         }
@@ -53,6 +64,14 @@ public class BuildingGenerator : MonoBehaviour
         {
             this.position = position;
             this.HasRoof = hasRoof;
+            
+            // creates a list of each side (wall) of the building
+            Walls = new Wall[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                Walls[i] = new Wall(Wall.WallType.Plain);
+            }
         }
 
         public Vector2 RoomPosition
@@ -86,13 +105,45 @@ public class BuildingGenerator : MonoBehaviour
                 for(int h = 0; h < height; h++)
                 {
                     rooms[w, h] = new Room(new Vector2(w * cellUnitSize, h * cellUnitSize), includeRoof ? (floorCount == floors.Length - 1) : false);
+                    AssignWallFeatures(rooms[w, h], floorCount, w, h);
                 }
             }
             floors[floorCount] = new Floor(floorCount++, rooms);
         }
     }
 
-    // builds sthe building using the prefab & applies rotation
+    // Logic to apply windows & doors on any side
+    void AssignWallFeatures(Room room, int floorNumber, int roomX, int roomY)
+    {
+        bool isNorthEdge = roomY == height - 1;
+        bool isEastEdge = roomX == width - 1;
+        bool isSouthEdge = roomY == 0;
+        bool isWestEdge = roomX == 0;
+
+        bool[] isExterior = { isNorthEdge, isEastEdge, isSouthEdge, isWestEdge };
+        bool isGroundFloor = floorNumber == 0;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (!isExterior[i])
+                continue; 
+
+            bool canPlaceDoor = (!doorsOnGroundFloorOnly || isGroundFloor) && isGroundFloor; 
+
+            if (canPlaceDoor && Random.value < doorPercentChance)
+            {
+                room.Walls[i].SetWallType(Wall.WallType.Door);
+                continue;
+            }
+
+            if (Random.value < windowPercentChance)
+            {
+                room.Walls[i].SetWallType(Wall.WallType.Window);
+            }
+        }
+    }
+
+    // builds the building using the prefab & applies rotation
     void RenderBuilding()
     {
         foreach(Floor floor in floors)
@@ -102,15 +153,35 @@ public class BuildingGenerator : MonoBehaviour
                 for(int h = 0; h < height; h++)
                 {
                     Room room = floor.rooms[w, h];
-                    var wall1 = Instantiate(wallPrefab, new Vector3(room.RoomPosition.x, floor.FloorNumber, room.RoomPosition.y), Quaternion.Euler(0,0,0));
-                    wall1.transform.parent = transform;
-                    var wall2 = Instantiate(wallPrefab, new Vector3(room.RoomPosition.x, floor.FloorNumber, room.RoomPosition.y), Quaternion.Euler(0, 90, 0));
-                    wall2.transform.parent = transform;
-                    var wall3 = Instantiate(wallPrefab, new Vector3(room.RoomPosition.x, floor.FloorNumber, room.RoomPosition.y), Quaternion.Euler(0, 180, 0));
-                    wall3.transform.parent = transform;
-                    var wall4 = Instantiate(wallPrefab, new Vector3(room.RoomPosition.x, floor.FloorNumber, room.RoomPosition.y), Quaternion.Euler(0, -90, 0));
-                    wall4.transform.parent = transform;
+                    Vector3 basePosition = new Vector3(room.RoomPosition.x, floor.FloorNumber, room.RoomPosition.y);
+                    
+                    Quaternion[] rotations = {
+                        Quaternion.Euler(0, 0, 0),
+                        Quaternion.Euler(0, 90, 0),
+                        Quaternion.Euler(0, 180, 0),
+                        Quaternion.Euler(0, -90, 0)
+                    };
 
+                    // Render each wall with its features
+                    for (int i = 0; i < 4; i++)
+                    {
+                        var wall = Instantiate(wallPrefab, basePosition, rotations[i]);
+                        wall.transform.parent = transform;
+
+                        // Add door or window based on wall type
+                        if (room.Walls[i].WallTypeSelected == Wall.WallType.Door)
+                        {
+                            var door = Instantiate(doorPrefab, basePosition, rotations[i]);
+                            door.transform.parent = wall.transform;
+                        }
+                        else if (room.Walls[i].WallTypeSelected == Wall.WallType.Window)
+                        {
+                            var window = Instantiate(windowPrefab, basePosition, rotations[i]);
+                            window.transform.parent = wall.transform;
+                        }
+                    }
+
+                    // Applies roof if we want a roof
                     if (room.HasRoof)
                     {
                         var roof = Instantiate(roofPrefab, new Vector3(room.RoomPosition.x, floor.FloorNumber, room.RoomPosition.y), Quaternion.identity);

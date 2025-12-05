@@ -91,7 +91,7 @@ public class BuildingGenerator : MonoBehaviour
     }
 
     // Creates the data for the structure
-    void GenerateBuilding()
+    public void GenerateBuilding()
     {
         floors = new Floor[numberOfFloors];
 
@@ -144,7 +144,7 @@ public class BuildingGenerator : MonoBehaviour
     }
 
     // builds the building using the prefab & applies rotation
-    void RenderBuilding()
+    public void RenderBuilding()
     {
         foreach(Floor floor in floors)
         {

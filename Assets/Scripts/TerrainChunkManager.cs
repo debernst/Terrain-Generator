@@ -54,6 +54,11 @@ public class TerrainChunkManager : MonoBehaviour
 
                 // Generates Cabes
                 cave.GenerateCaves();
+
+                // Spawn Trees After modifying the terrain
+                TreeSpawner trees = newChunk.GetComponent<TreeSpawner>();
+                if (trees != null)
+                    trees.SpawnTrees();
             }
         }
     }
